@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -22,6 +23,13 @@ const UserSchema = new mongoose.Schema({
     required: [true, 'Please provide password'],
     minlength: 6,
   },
+});
+
+UserSchema.pre('save', async function (next) {
+  //middleware de mongoose que dice antes de guardar el documento hacé...
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next(); //segun documentacion,al usar async sacandole next funciona igual
 });
 
 module.exports = mongoose.model('User', UserSchema);
