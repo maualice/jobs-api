@@ -1,6 +1,6 @@
 const User = require('../models/User');
 const { StatusCodes } = require('http-status-codes');
-const jwt = require('jsonwebtoken');
+const { BadRequestError, UnauthenticatedError } = require('../errors');
 
 const register = async (req, res) => {
   /* const { name, email, password } = req.body;
@@ -20,7 +20,26 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  res.send('login user');
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    throw new BadRequestError('Please provide email and password');
+  } //sin esto,si viene un pass vacio,en comparePass arrojaria un error,pero estaria vacio ya que no se esta manejando
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new UnauthenticatedError('Invalid Credentials');
+  }
+
+  const isPasswordCorrect = await user.comparePassword(password);
+  if (!isPasswordCorrect) {
+    throw new UnauthenticatedError('Invalid Credentials');
+  }
+
+  //compare password
+  const token = user.createJWT();
+  res.status(StatusCodes.OK).json({ user: { name: user.name }, token });
 };
 
 module.exports = {
