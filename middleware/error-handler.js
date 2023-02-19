@@ -1,6 +1,5 @@
 //const { CustomAPIError } = require('../errors');
 const { StatusCodes } = require('http-status-codes');
-const { custom } = require('joi');
 const errorHandlerMiddleware = (err, req, res, next) => {
   let customError = {
     //set default
